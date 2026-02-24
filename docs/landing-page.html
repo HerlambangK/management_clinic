@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlowUp - Sistem Manajemen Klinik Kecantikan Modern</title>
+    <meta name="description" content="Kelola klinik kecantikan Anda dengan lebih mudah. Booking online, treatment record, POS, dan laporan dalam satu platform.">
+    
+    <!-- Tailwind CSS 4 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#fdf4f3',
+                            100: '#fce8e6',
+                            200: '#f9d5d2',
+                            300: '#f4b5ae',
+                            400: '#ec8b81',
+                            500: '#e06456',
+                            600: '#cc4637',
+                            700: '#ab372a',
+                            800: '#8e3127',
+                            900: '#772e26',
+                        },
+                        rose: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            200: '#fecdd3',
+                            300: '#fda4af',
+                            400: '#fb7185',
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                            700: '#be123c',
+                            800: '#9f1239',
+                            900: '#881337',
+                        },
+                        cream: '#FFF9F5',
+                        peach: '#FFEEE8',
+                    },
+                    fontFamily: {
+                        display: ['Playfair Display', 'serif'],
+                        sans: ['DM Sans', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+    
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <style>
+        body {
+            font-family: 'DM Sans', sans-serif;
+        }
+        .font-display {
+            font-family: 'Playfair Display', serif;
+        }
+        
+        /* Custom Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        .animate-fade-in-up { animation: fadeInUp 0.8s ease-out forwards; }
+        .animate-slide-in-left { animation: slideInLeft 0.8s ease-out forwards; }
+        .animate-pulse-soft { animation: pulse-soft 3s ease-in-out infinite; }
+        
+        /* Stagger animations */
+        .stagger-1 { animation-delay: 0.1s; opacity: 0; }
+        .stagger-2 { animation-delay: 0.2s; opacity: 0; }
+        .stagger-3 { animation-delay: 0.3s; opacity: 0; }
+        .stagger-4 { animation-delay: 0.4s; opacity: 0; }
+        .stagger-5 { animation-delay: 0.5s; opacity: 0; }
+        
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(135deg, #e11d48 0%, #f43f5e 50%, #fb7185 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Glass effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        
+        /* Blob shapes */
+        .blob-1 {
+            border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+        }
+        .blob-2 {
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #fdf4f3; }
+        ::-webkit-scrollbar-thumb { background: #fda4af; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #fb7185; }
+    </style>
+</head>
+<body class="bg-cream antialiased" x-data="{ mobileMenu: false, showDemo: false }">
+    
+    <!-- Decorative Background Elements -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-br from-rose-200/40 to-primary-200/30 blob-1 blur-3xl animate-pulse-soft"></div>
+        <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gradient-to-tr from-rose-100/50 to-peach/50 blob-2 blur-3xl" style="animation-delay: 1.5s;"></div>
+        <div class="absolute top-1/2 left-1/2 w-[400px] h-[400px] bg-gradient-to-r from-primary-100/30 to-rose-100/30 rounded-full blur-3xl transform -translate-x-1/2 -translate-y-1/2"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 glass border-b border-rose-100/50" x-data="{ scrolled: false }" @scroll.window="scrolled = window.scrollY > 50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <!-- Logo -->
+                <a href="#" class="flex items-center space-x-3 group">
+                    <div class="w-10 h-10 bg-gradient-to-br from-rose-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg shadow-rose-200 group-hover:shadow-rose-300 transition-shadow">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                        </svg>
+                    </div>
+                    <span class="text-2xl font-display font-bold text-gray-900">Glow<span class="gradient-text">Up</span></span>
+                </a>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#features" class="text-gray-600 hover:text-rose-600 transition-colors font-medium">Fitur</a>
+                    <a href="#pricing" class="text-gray-600 hover:text-rose-600 transition-colors font-medium">Harga</a>
+                    <a href="#testimonials" class="text-gray-600 hover:text-rose-600 transition-colors font-medium">Testimoni</a>
+                    <a href="#faq" class="text-gray-600 hover:text-rose-600 transition-colors font-medium">FAQ</a>
+                </div>
+                
+                <!-- CTA Buttons -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <a href="/login" class="text-gray-700 hover:text-rose-600 font-medium transition-colors">Masuk</a>
+                    <a href="/register" class="px-6 py-2.5 bg-gradient-to-r from-rose-500 to-primary-600 text-white font-semibold rounded-full hover:shadow-lg hover:shadow-rose-200 transition-all hover:-translate-y-0.5">
+                        Coba Gratis
+                    </a>
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <button @click="mobileMenu = !mobileMenu" class="md:hidden p-2 rounded-lg hover:bg-rose-50 transition-colors">
+                    <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path x-show="!mobileMenu" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        <path x-show="mobileMenu" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div x-show="mobileMenu" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="md:hidden bg-white/95 backdrop-blur-lg border-t border-rose-100">
+            <div class="px-4 py-6 space-y-4">
+                <a href="#features" class="block text-gray-700 hover:text-rose-600 font-medium py-2">Fitur</a>
+                <a href="#pricing" class="block text-gray-700 hover:text-rose-600 font-medium py-2">Harga</a>
+                <a href="#testimonials" class="block text-gray-700 hover:text-rose-600 font-medium py-2">Testimoni</a>
+                <a href="#faq" class="block text-gray-700 hover:text-rose-600 font-medium py-2">FAQ</a>
+                <div class="pt-4 border-t border-rose-100 space-y-3">
+                    <a href="/login" class="block text-center text-gray-700 font-medium py-2">Masuk</a>
+                    <a href="/register" class="block text-center px-6 py-3 bg-gradient-to-r from-rose-500 to-primary-600 text-white font-semibold rounded-full">Coba Gratis</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center pt-20 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
+            <div class="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+                <!-- Left Content -->
+                <div class="relative z-10">
+                    <div class="animate-fade-in-up stagger-1">
+                        <span class="inline-flex items-center px-4 py-1.5 rounded-full bg-rose-100 text-rose-700 text-sm font-medium mb-6">
+                            <span class="w-2 h-2 bg-rose-500 rounded-full mr-2 animate-pulse"></span>
+                            #1 Beauty Clinic Software di Indonesia
+                        </span>
+                    </div>
+                    
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-display font-bold text-gray-900 leading-tight animate-fade-in-up stagger-2">
+                        Kelola Klinik Kecantikan 
+                        <span class="gradient-text">Lebih Mudah</span>
+                    </h1>
+                    
+                    <p class="mt-6 text-lg sm:text-xl text-gray-600 leading-relaxed animate-fade-in-up stagger-3">
+                        Booking online, treatment record, kasir, dan laporan lengkap dalam satu platform. 
+                        Tingkatkan profesionalisme klinik Anda dan buat customer lebih puas.
+                    </p>
+                    
+                    <div class="mt-10 flex flex-col sm:flex-row gap-4 animate-fade-in-up stagger-4">
+                        <a href="/register" class="group inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-rose-500 to-primary-600 text-white font-semibold rounded-full hover:shadow-xl hover:shadow-rose-200/50 transition-all hover:-translate-y-1">
+                            Mulai Gratis 14 Hari
+                            <svg class="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                            </svg>
+                        </a>
+                        <button @click="showDemo = true" class="group inline-flex items-center justify-center px-8 py-4 border-2 border-rose-200 text-gray-700 font-semibold rounded-full hover:border-rose-400 hover:bg-rose-50 transition-all">
+                            <svg class="mr-2 w-5 h-5 text-rose-500" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z"/>
+                            </svg>
+                            Lihat Demo
+                        </button>
+                    </div>
+                    
+                    <!-- Trust Badges -->
+                    <div class="mt-12 animate-fade-in-up stagger-5">
+                        <p class="text-sm text-gray-500 mb-4">Dipercaya oleh 500+ klinik di Indonesia</p>
+                        <div class="flex items-center space-x-6">
+                            <div class="flex -space-x-2">
+                                <img class="w-10 h-10 rounded-full border-2 border-white shadow-md" src="https://i.pravatar.cc/100?img=1" alt="User">
+                                <img class="w-10 h-10 rounded-full border-2 border-white shadow-md" src="https://i.pravatar.cc/100?img=2" alt="User">
+                                <img class="w-10 h-10 rounded-full border-2 border-white shadow-md" src="https://i.pravatar.cc/100?img=3" alt="User">
+                                <img class="w-10 h-10 rounded-full border-2 border-white shadow-md" src="https://i.pravatar.cc/100?img=4" alt="User">
+                                <div class="w-10 h-10 rounded-full border-2 border-white shadow-md bg-rose-100 flex items-center justify-center text-rose-600 text-xs font-bold">+500</div>
+                            </div>
+                            <div class="flex items-center text-amber-500">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                <span class="ml-1 text-gray-700 font-semibold">4.9</span>
+                                <span class="ml-1 text-gray-500 text-sm">(200+ reviews)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Content - Dashboard Preview -->
+                <div class="relative lg:pl-10">
+                    <div class="relative animate-float">
+                        <!-- Main Dashboard Card -->
+                        <div class="relative bg-white rounded-3xl shadow-2xl shadow-rose-200/40 overflow-hidden border border-rose-100">
+                            <div class="bg-gradient-to-r from-rose-500 to-primary-600 px-6 py-4">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-3 h-3 rounded-full bg-white/30"></div>
+                                    <div class="w-3 h-3 rounded-full bg-white/30"></div>
+                                    <div class="w-3 h-3 rounded-full bg-white/30"></div>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <div class="flex items-center justify-between mb-6">
+                                    <div>
+                                        <p class="text-sm text-gray-500">Revenue Bulan Ini</p>
+                                        <p class="text-3xl font-bold text-gray-900">Rp 47.5 Jt</p>
+                                    </div>
+                                    <div class="px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full">+23%</div>
+                                </div>
+                                <div class="h-32 bg-gradient-to-t from-rose-50 to-white rounded-xl flex items-end px-4 pb-4">
+                                    <div class="flex items-end space-x-2 w-full">
+                                        <div class="flex-1 bg-rose-200 rounded-t-md" style="height: 40%"></div>
+                                        <div class="flex-1 bg-rose-300 rounded-t-md" style="height: 65%"></div>
+                                        <div class="flex-1 bg-rose-400 rounded-t-md" style="height: 50%"></div>
+                                        <div class="flex-1 bg-rose-500 rounded-t-md" style="height: 80%"></div>
+                                        <div class="flex-1 bg-gradient-to-t from-rose-500 to-primary-500 rounded-t-md" style="height: 100%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Floating Cards -->
+                        <div class="absolute -left-12 top-20 bg-white rounded-2xl shadow-xl shadow-rose-100 p-4 border border-rose-50 animate-fade-in-up" style="animation-delay: 0.6s;">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-12 h-12 bg-rose-100 rounded-xl flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">Hari Ini</p>
+                                    <p class="text-lg font-bold text-gray-900">12 Booking</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="absolute -right-8 bottom-20 bg-white rounded-2xl shadow-xl shadow-rose-100 p-4 border border-rose-50 animate-fade-in-up" style="animation-delay: 0.8s;">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">Treatment Selesai</p>
+                                    <p class="text-lg font-bold text-gray-900">8 Customer</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 lg:py-32 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Section Header -->
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="inline-flex items-center px-4 py-1.5 rounded-full bg-rose-100 text-rose-700 text-sm font-medium mb-4">
+                    Fitur Lengkap
+                </span>
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-gray-900">
+                    Semua yang Anda Butuhkan untuk 
+                    <span class="gradient-text">Mengelola Klinik</span>
+                </h2>
+                <p class="mt-6 text-lg text-gray-600">
+                    Dari booking hingga laporan keuangan, semua terintegrasi dalam satu platform yang mudah digunakan.
+                </p>
+            </div>
+            
+            <!-- Features Grid -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="group bg-white rounded-3xl p-8 shadow-lg shadow-rose-100/50 border border-rose-50 hover:shadow-xl hover:shadow-rose-200/50 transition-all hover:-translate-y-2">
+                    <div class="w-14 h-14 bg-gradient-to-br from-rose-500 to-primary-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Online Booking</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Customer bisa booking 24 jam via link yang bisa dishare ke WhatsApp atau Instagram. Gak perlu bales chat tengah malam lagi!
+                    </p>
+                </div>
+                
+                <!-- Feature 2 -->
+                <div class="group bg-white rounded-3xl p-8 shadow-lg shadow-rose-100/50 border border-rose-50 hover:shadow-xl hover:shadow-rose-200/50 transition-all hover:-translate-y-2">
+                    <div class="w-14 h-14 bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Treatment Record</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Catat riwayat treatment, foto before/after, jenis kulit, alergi, dan rekomendasi. Data customer tersimpan rapi selamanya.
+                    </p>
+                </div>
+                
+                <!-- Feature 3 -->
+                <div class="group bg-white rounded-3xl p-8 shadow-lg shadow-rose-100/50 border border-rose-50 hover:shadow-xl hover:shadow-rose-200/50 transition-all hover:-translate-y-2">
+                    <div class="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Kasir & Pembayaran</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Checkout mudah dengan berbagai metode pembayaran: cash, QRIS, transfer, kartu. Cetak struk atau kirim digital.
+                    </p>
+                </div>
+                
+                <!-- Feature 4 -->
+                <div class="group bg-white rounded-3xl p-8 shadow-lg shadow-rose-100/50 border border-rose-50 hover:shadow-xl hover:shadow-rose-200/50 transition-all hover:-translate-y-2">
+                    <div class="w-14 h-14 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Paket & Membership</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Buat paket treatment (10x facial, dll), track sisa sesi, dan reminder otomatis sebelum expired. Customer lebih loyal!
+                    </p>
+                </div>
+                
+                <!-- Feature 5 -->
+                <div class="group bg-white rounded-3xl p-8 shadow-lg shadow-rose-100/50 border border-rose-50 hover:shadow-xl hover:shadow-rose-200/50 transition-all hover:-translate-y-2">
+                    <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Manajemen Staff</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Atur jadwal kerja beautician, assign ke appointment, hitung komisi otomatis, dan pantau performa masing-masing.
+                    </p>
+                </div>
+                
+                <!-- Feature 6 -->
+                <div class="group bg-white rounded-3xl p-8 shadow-lg shadow-rose-100/50 border border-rose-50 hover:shadow-xl hover:shadow-rose-200/50 transition-all hover:-translate-y-2">
+                    <div class="w-14 h-14 bg-gradient-to-br from-pink-500 to-rose-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Laporan & Analytics</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Dashboard real-time dengan laporan revenue, treatment populer, customer retention, dan insight bisnis lainnya.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="py-20 lg:py-32 bg-gradient-to-b from-white to-rose-50/50 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="inline-flex items-center px-4 py-1.5 rounded-full bg-rose-100 text-rose-700 text-sm font-medium mb-4">
+                    Mudah Digunakan
+                </span>
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-gray-900">
+                    Mulai dalam <span class="gradient-text">3 Langkah</span>
+                </h2>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8 lg:gap-12">
+                <!-- Step 1 -->
+                <div class="text-center">
+                    <div class="relative inline-flex">
+                        <div class="w-20 h-20 bg-gradient-to-br from-rose-500 to-primary-600 rounded-3xl flex items-center justify-center text-white text-3xl font-display font-bold shadow-lg shadow-rose-200">
+                            1
+                        </div>
+                        <div class="absolute -right-4 top-1/2 hidden md:block">
+                            <svg class="w-8 h-8 text-rose-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <h3 class="mt-6 text-xl font-bold text-gray-900">Daftar & Setup</h3>
+                    <p class="mt-3 text-gray-600">Buat akun gratis, isi profil klinik, dan tambahkan daftar treatment Anda dalam hitungan menit.</p>
+                </div>
+                
+                <!-- Step 2 -->
+                <div class="text-center">
+                    <div class="relative inline-flex">
+                        <div class="w-20 h-20 bg-gradient-to-br from-rose-500 to-primary-600 rounded-3xl flex items-center justify-center text-white text-3xl font-display font-bold shadow-lg shadow-rose-200">
+                            2
+                        </div>
+                        <div class="absolute -right-4 top-1/2 hidden md:block">
+                            <svg class="w-8 h-8 text-rose-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <h3 class="mt-6 text-xl font-bold text-gray-900">Share Booking Link</h3>
+                    <p class="mt-3 text-gray-600">Bagikan link booking ke Instagram bio, WhatsApp, atau website. Customer bisa booking langsung!</p>
+                </div>
+                
+                <!-- Step 3 -->
+                <div class="text-center">
+                    <div class="relative inline-flex">
+                        <div class="w-20 h-20 bg-gradient-to-br from-rose-500 to-primary-600 rounded-3xl flex items-center justify-center text-white text-3xl font-display font-bold shadow-lg shadow-rose-200">
+                            3
+                        </div>
+                    </div>
+                    <h3 class="mt-6 text-xl font-bold text-gray-900">Kelola & Pantau</h3>
+                    <p class="mt-3 text-gray-600">Terima booking, catat treatment, checkout, dan pantau pertumbuhan bisnis dari dashboard.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-20 lg:py-32 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="inline-flex items-center px-4 py-1.5 rounded-full bg-rose-100 text-rose-700 text-sm font-medium mb-4">
+                    Harga Terjangkau
+                </span>
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-gray-900">
+                    Pilih Paket yang <span class="gradient-text">Sesuai Kebutuhan</span>
+                </h2>
+                <p class="mt-6 text-lg text-gray-600">
+                    Mulai gratis, upgrade kapan saja. Tanpa biaya tersembunyi.
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <!-- Basic Plan -->
+                <div class="bg-white rounded-3xl p-8 shadow-lg shadow-rose-100/50 border border-rose-50 hover:shadow-xl transition-shadow">
+                    <div class="text-center">
+                        <h3 class="text-xl font-bold text-gray-900">Basic</h3>
+                        <p class="mt-2 text-gray-500">Untuk klinik yang baru mulai</p>
+                        <div class="mt-6">
+                            <span class="text-4xl font-display font-bold text-gray-900">Rp 99rb</span>
+                            <span class="text-gray-500">/bulan</span>
+                        </div>
+                    </div>
+                    <ul class="mt-8 space-y-4">
+                        <li class="flex items-center text-gray-600">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            1 User
+                        </li>
+                        <li class="flex items-center text-gray-600">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            100 Appointment/bulan
+                        </li>
+                        <li class="flex items-center text-gray-600">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            Online Booking
+                        </li>
+                        <li class="flex items-center text-gray-600">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            Kasir & Struk Digital
+                        </li>
+                        <li class="flex items-center text-gray-400">
+                            <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                            Treatment Record
+                        </li>
+                    </ul>
+                    <a href="/register" class="mt-8 block w-full py-3 text-center border-2 border-rose-200 text-rose-600 font-semibold rounded-full hover:bg-rose-50 transition-colors">
+                        Mulai Gratis
+                    </a>
+                </div>
+                
+                <!-- Pro Plan (Popular) -->
+                <div class="bg-gradient-to-b from-rose-500 to-primary-600 rounded-3xl p-8 shadow-xl shadow-rose-200/50 relative transform md:-translate-y-4">
+                    <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                        <span class="px-4 py-1 bg-amber-400 text-amber-900 text-sm font-bold rounded-full shadow-lg">
+                            POPULAR
+                        </span>
+                    </div>
+                    <div class="text-center">
+                        <h3 class="text-xl font-bold text-white">Pro</h3>
+                        <p class="mt-2 text-rose-100">Untuk klinik yang berkembang</p>
+                        <div class="mt-6">
+                            <span class="text-4xl font-display font-bold text-white">Rp 199rb</span>
+                            <span class="text-rose-100">/bulan</span>
+                        </div>
+                    </div>
+                    <ul class="mt-8 space-y-4">
+                        <li class="flex items-center text-white">
+                            <svg class="w-5 h-5 text-rose-200 mr-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            5 Users
+                        </li>
+                        <li class="flex items-center text-white">
+                            <svg class="w-5 h-5 text-rose-200 mr-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            Unlimited Appointment
+                        </li>
+                        <li class="flex items-center text-white">
+                            <svg class="w-5 h-5 text-rose-200 mr-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            Treatment Record + Photo
+                        </li>
+                        <li class="flex items-center text-white">
+                            <svg class="w-5 h-5 text-rose-200 mr-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            Paket & Membership
+                        </li>
+                        <li class="flex items-center text-white">
+                            <svg class="w-5 h-5 text-rose-200 mr-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            Laporan Lengkap
+                        </li>
+                    </ul>
+                    <a href="/register" class="mt-8 block w-full py-3 text-center bg-white text-rose-600 font-semibold rounded-full hover:shadow-lg transition-shadow">
+                        Mulai Gratis 14 Hari
+                    </a>
+                </div>
+                
+                <!-- Business Plan -->
+                <div class="bg-white rounded-3xl p-8 shadow-lg shadow-rose-100/50 border border-rose-50 hover:shadow-xl transition-shadow">
+                    <div class="text-center">
+                        <h3 class="text-xl font-bold text-gray-900">Business</h3>
+                        <p class="mt-2 text-gray-500">Untuk klinik multi-cabang</p>
+                        <div class="mt-6">
+                            <span class="text-4xl font-display font-bold text-gray-900">Rp 399rb</span>
+                            <span class="text-gray-500">/bulan</span>
+                        </div>
+                    </div>
+                    <ul class="mt-8 space-y-4">
+                        <li class="flex items-center text-gray-600">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            Unlimited Users
+                        </li>
+                        <li class="flex items-center text-gray-600">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            Multi-Cabang
+                        </li>
+                        <li class="flex items-center text-gray-600">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            Semua Fitur Pro
+                        </li>
+                        <li class="flex items-center text-gray-600">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            Komisi Staff
+                        </li>
+                        <li class="flex items-center text-gray-600">
+                            <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            Priority Support
+                        </li>
+                    </ul>
+                    <a href="/register" class="mt-8 block w-full py-3 text-center border-2 border-rose-200 text-rose-600 font-semibold rounded-full hover:bg-rose-50 transition-colors">
+                        Hubungi Sales
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="py-20 lg:py-32 bg-gradient-to-b from-rose-50/50 to-white relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="inline-flex items-center px-4 py-1.5 rounded-full bg-rose-100 text-rose-700 text-sm font-medium mb-4">
+                    Testimoni
+                </span>
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-gray-900">
+                    Apa Kata <span class="gradient-text">Mereka</span>
+                </h2>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Testimonial 1 -->
+                <div class="bg-white rounded-3xl p-8 shadow-lg shadow-rose-100/50 border border-rose-50">
+                    <div class="flex items-center text-amber-400 mb-4">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                    </div>
+                    <p class="text-gray-600 leading-relaxed mb-6">
+                        "Sebelum pakai GlowUp, booking masih manual via WA. Sering bentrok jadwal dan lupa follow-up customer. Sekarang semua teratur, revenue naik 30%!"
+                    </p>
+                    <div class="flex items-center">
+                        <img class="w-12 h-12 rounded-full" src="https://i.pravatar.cc/100?img=5" alt="Dr. Sarah">
+                        <div class="ml-4">
+                            <p class="font-semibold text-gray-900">Dr. Sarah Amelia</p>
+                            <p class="text-sm text-gray-500">Owner, Glow Aesthetic Clinic - Jakarta</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Testimonial 2 -->
+                <div class="bg-white rounded-3xl p-8 shadow-lg shadow-rose-100/50 border border-rose-50">
+                    <div class="flex items-center text-amber-400 mb-4">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                    </div>
+                    <p class="text-gray-600 leading-relaxed mb-6">
+                        "Treatment record dengan foto before/after sangat membantu. Customer jadi lebih percaya dan mau lanjut treatment. Fitur paket juga bikin repeat order naik!"
+                    </p>
+                    <div class="flex items-center">
+                        <img class="w-12 h-12 rounded-full" src="https://i.pravatar.cc/100?img=10" alt="Maya">
+                        <div class="ml-4">
+                            <p class="font-semibold text-gray-900">Maya Puspita</p>
+                            <p class="text-sm text-gray-500">Owner, Cantik Spa & Beauty - Bandung</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Testimonial 3 -->
+                <div class="bg-white rounded-3xl p-8 shadow-lg shadow-rose-100/50 border border-rose-50">
+                    <div class="flex items-center text-amber-400 mb-4">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                    </div>
+                    <p class="text-gray-600 leading-relaxed mb-6">
+                        "Dashboard-nya informatif banget. Saya bisa tau treatment mana yang paling laku, jam sibuk kapan, dan performa masing-masing beautician. Data-driven decision!"
+                    </p>
+                    <div class="flex items-center">
+                        <img class="w-12 h-12 rounded-full" src="https://i.pravatar.cc/100?img=15" alt="Rina">
+                        <div class="ml-4">
+                            <p class="font-semibold text-gray-900">Rina Wijaya</p>
+                            <p class="text-sm text-gray-500">Owner, Aura Skin Clinic - Surabaya</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="py-20 lg:py-32 relative z-10">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="inline-flex items-center px-4 py-1.5 rounded-full bg-rose-100 text-rose-700 text-sm font-medium mb-4">
+                    FAQ
+                </span>
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-gray-900">
+                    Pertanyaan <span class="gradient-text">Umum</span>
+                </h2>
+            </div>
+            
+            <div class="space-y-4" x-data="{ active: 1 }">
+                <!-- FAQ 1 -->
+                <div class="bg-white rounded-2xl shadow-lg shadow-rose-100/50 border border-rose-50 overflow-hidden">
+                    <button @click="active = active === 1 ? null : 1" class="w-full px-6 py-5 text-left flex items-center justify-between">
+                        <span class="font-semibold text-gray-900">Apakah ada trial gratis?</span>
+                        <svg class="w-5 h-5 text-rose-500 transform transition-transform" :class="{ 'rotate-180': active === 1 }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div x-show="active === 1" x-collapse class="px-6 pb-5">
+                        <p class="text-gray-600">Ya! Semua paket bisa dicoba gratis selama 14 hari dengan fitur lengkap. Tidak perlu kartu kredit untuk mendaftar.</p>
+                    </div>
+                </div>
+                
+                <!-- FAQ 2 -->
+                <div class="bg-white rounded-2xl shadow-lg shadow-rose-100/50 border border-rose-50 overflow-hidden">
+                    <button @click="active = active === 2 ? null : 2" class="w-full px-6 py-5 text-left flex items-center justify-between">
+                        <span class="font-semibold text-gray-900">Apakah data customer aman?</span>
+                        <svg class="w-5 h-5 text-rose-500 transform transition-transform" :class="{ 'rotate-180': active === 2 }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div x-show="active === 2" x-collapse class="px-6 pb-5">
+                        <p class="text-gray-600">Absolutely! Data disimpan di server yang terenkripsi dengan standar industri. Setiap klinik memiliki data yang terisolasi dan hanya bisa diakses oleh pemilik klinik.</p>
+                    </div>
+                </div>
+                
+                <!-- FAQ 3 -->
+                <div class="bg-white rounded-2xl shadow-lg shadow-rose-100/50 border border-rose-50 overflow-hidden">
+                    <button @click="active = active === 3 ? null : 3" class="w-full px-6 py-5 text-left flex items-center justify-between">
+                        <span class="font-semibold text-gray-900">Bisa diakses dari HP?</span>
+                        <svg class="w-5 h-5 text-rose-500 transform transition-transform" :class="{ 'rotate-180': active === 3 }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div x-show="active === 3" x-collapse class="px-6 pb-5">
+                        <p class="text-gray-600">Ya, dashboard web responsive dan bisa diakses dari browser HP. Kami juga sedang mengembangkan mobile app untuk pengalaman yang lebih optimal.</p>
+                    </div>
+                </div>
+                
+                <!-- FAQ 4 -->
+                <div class="bg-white rounded-2xl shadow-lg shadow-rose-100/50 border border-rose-50 overflow-hidden">
+                    <button @click="active = active === 4 ? null : 4" class="w-full px-6 py-5 text-left flex items-center justify-between">
+                        <span class="font-semibold text-gray-900">Bagaimana dengan support?</span>
+                        <svg class="w-5 h-5 text-rose-500 transform transition-transform" :class="{ 'rotate-180': active === 4 }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div x-show="active === 4" x-collapse class="px-6 pb-5">
+                        <p class="text-gray-600">Kami menyediakan support via WhatsApp dan email. Paket Business mendapatkan priority support dengan response time maksimal 2 jam di jam kerja.</p>
+                    </div>
+                </div>
+                
+                <!-- FAQ 5 -->
+                <div class="bg-white rounded-2xl shadow-lg shadow-rose-100/50 border border-rose-50 overflow-hidden">
+                    <button @click="active = active === 5 ? null : 5" class="w-full px-6 py-5 text-left flex items-center justify-between">
+                        <span class="font-semibold text-gray-900">Bisa cancel subscription kapan saja?</span>
+                        <svg class="w-5 h-5 text-rose-500 transform transition-transform" :class="{ 'rotate-180': active === 5 }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div x-show="active === 5" x-collapse class="px-6 pb-5">
+                        <p class="text-gray-600">Ya, Anda bisa cancel kapan saja tanpa penalti. Data Anda akan tetap tersimpan selama 30 hari setelah cancel jika ingin reaktivasi.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 lg:py-32 relative z-10">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-gradient-to-r from-rose-500 to-primary-600 rounded-3xl p-8 md:p-16 text-center relative overflow-hidden">
+                <!-- Decorative elements -->
+                <div class="absolute top-0 left-0 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+                <div class="absolute bottom-0 right-0 w-60 h-60 bg-white/10 rounded-full blur-2xl"></div>
+                
+                <div class="relative z-10">
+                    <h2 class="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-white mb-6">
+                        Siap Tingkatkan Klinik Anda?
+                    </h2>
+                    <p class="text-lg text-rose-100 mb-10 max-w-2xl mx-auto">
+                        Bergabung dengan 500+ klinik yang sudah menggunakan GlowUp untuk mengelola bisnis mereka dengan lebih efisien.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <a href="/register" class="inline-flex items-center justify-center px-8 py-4 bg-white text-rose-600 font-semibold rounded-full hover:shadow-xl transition-all hover:-translate-y-1">
+                            Mulai Gratis Sekarang
+                            <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                            </svg>
+                        </a>
+                        <a href="https://wa.me/6281234567890" class="inline-flex items-center justify-center px-8 py-4 border-2 border-white/50 text-white font-semibold rounded-full hover:bg-white/10 transition-all">
+                            <svg class="mr-2 w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                            </svg>
+                            Hubungi via WhatsApp
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-16 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-12">
+                <!-- Brand -->
+                <div class="md:col-span-2">
+                    <a href="#" class="flex items-center space-x-3 mb-6">
+                        <div class="w-10 h-10 bg-gradient-to-br from-rose-500 to-primary-600 rounded-2xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                            </svg>
+                        </div>
+                        <span class="text-2xl font-display font-bold text-white">GlowUp</span>
+                    </a>
+                    <p class="text-gray-400 leading-relaxed max-w-md">
+                        Platform manajemen klinik kecantikan terlengkap di Indonesia. Booking, treatment record, kasir, dan laporan dalam satu sistem.
+                    </p>
+                    <div class="flex space-x-4 mt-6">
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-rose-500 transition-colors">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-rose-500 transition-colors">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-rose-500 transition-colors">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Links -->
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Produk</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#features" class="hover:text-rose-400 transition-colors">Fitur</a></li>
+                        <li><a href="#pricing" class="hover:text-rose-400 transition-colors">Harga</a></li>
+                        <li><a href="#" class="hover:text-rose-400 transition-colors">API</a></li>
+                        <li><a href="#" class="hover:text-rose-400 transition-colors">Integrasi</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Support</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="hover:text-rose-400 transition-colors">Dokumentasi</a></li>
+                        <li><a href="#faq" class="hover:text-rose-400 transition-colors">FAQ</a></li>
+                        <li><a href="#" class="hover:text-rose-400 transition-colors">Kontak</a></li>
+                        <li><a href="#" class="hover:text-rose-400 transition-colors">Status</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-sm">© 2026 GlowUp. All rights reserved.</p>
+                <div class="flex space-x-6 mt-4 md:mt-0 text-sm">
+                    <a href="#" class="hover:text-rose-400 transition-colors">Privacy Policy</a>
+                    <a href="#" class="hover:text-rose-400 transition-colors">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Demo Modal -->
+    <div x-show="showDemo" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/80 backdrop-blur-sm" @click.self="showDemo = false">
+        <div x-show="showDemo" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" class="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            <div class="flex items-center justify-between p-6 border-b border-gray-100">
+                <h3 class="text-xl font-bold text-gray-900">Demo GlowUp Dashboard</h3>
+                <button @click="showDemo = false" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                    <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="aspect-video bg-gray-100">
+                <iframe class="w-full h-full" src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alpine.js Collapse Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+</body>
+</html>

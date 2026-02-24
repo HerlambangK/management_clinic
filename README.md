@@ -1,13 +1,15 @@
-# GlowUp - Sistem Manajemen Klinik, Salon & Barbershop
+# GlowUp - Platform Manajemen Multi-Bisnis (Clinic, Salon, Barbershop, Gym)
 
 <p align="center">
-  <strong>Aplikasi manajemen bisnis kecantikan all-in-one</strong><br>
-  Klinik Kecantikan &bull; Salon &bull; Barbershop
+  <strong>Aplikasi manajemen operasional all-in-one</strong><br>
+  Klinik Kecantikan &bull; Salon &bull; Barbershop &bull; Gym/Fitness
 </p>
 
 ## Tentang GlowUp
 
-GlowUp adalah aplikasi web manajemen bisnis kecantikan yang mendukung berbagai tipe usaha: **Klinik Kecantikan**, **Salon**, dan **Barbershop**. Dibangun dengan Laravel 12, aplikasi ini menyediakan fitur lengkap mulai dari manajemen pelanggan, appointment, POS, loyalty program, hingga customer portal dan mobile API.
+GlowUp adalah aplikasi web manajemen bisnis multi-tipe yang mendukung **Klinik Kecantikan**, **Salon**, **Barbershop**, dan **Gym/Fitness**. Dibangun dengan Laravel 12, aplikasi ini menyediakan fitur lengkap mulai dari manajemen pelanggan, appointment, POS, loyalty program, **QR attendance gym berbasis lokasi**, customer portal, hingga mobile API.
+
+Setiap owner memilih **satu jenis bisnis** untuk menjaga data dan fitur tetap konsisten (tidak tercampur antar tipe).
 
 ## Tech Stack
 
@@ -29,6 +31,7 @@ GlowUp adalah aplikasi web manajemen bisnis kecantikan yang mendukung berbagai t
 | **Klinik Kecantikan** | Pink | Treatment records, analisis kulit, paket, produk, loyalty, booking online, customer portal |
 | **Salon** | Purple | Paket layanan, produk, loyalty, booking online, customer portal, walk-in queue |
 | **Barbershop** | Blue | Produk (pomade, wax), loyalty, booking online, walk-in queue |
+| **Gym/Fitness** | Green | Paket membership, QR attendance + geolocation, attendance history, customer portal |
 
 Setiap tipe bisnis memiliki konfigurasi fitur (feature toggle), profil pelanggan, label, dan sample data yang berbeda.
 
@@ -36,7 +39,7 @@ Setiap tipe bisnis memiliki konfigurasi fitur (feature toggle), profil pelanggan
 
 ### 1. Setup Wizard
 - Wizard 3 langkah saat pertama kali install
-- Pilih tipe bisnis (klinik/salon/barbershop)
+- Pilih tipe bisnis (klinik/salon/barbershop/gym)
 - Input detail bisnis (nama, telepon, alamat)
 - Buat akun owner
 - Auto-generate kategori dan layanan sample sesuai tipe bisnis
@@ -106,6 +109,13 @@ Setiap tipe bisnis memiliki konfigurasi fitur (feature toggle), profil pelanggan
 - Pembatalan paket
 - Detail paket via API internal
 
+### 10b. QR Attendance Gym (Gym Only)
+- QR format `randomcode|timestamp` (validasi hanya randomcode)
+- QR auto-generate sesuai jam operasional & bisa manual regenerate
+- Validasi geolocation radius 100m
+- Timer workout saat sesi aktif + tombol **Selesai Latihan**
+- Attendance history + filter, search, dan durasi sesi
+
 ### 11. POS / Transaksi
 - Buat transaksi dengan multiple item (layanan, paket, produk)
 - Nomor invoice otomatis (format: INV + tanggal + sequence)
@@ -157,6 +167,7 @@ Setiap tipe bisnis memiliki konfigurasi fitur (feature toggle), profil pelanggan
 - **Informasi Bisnis**: Nama, telepon, alamat
 - **Jam Operasional**: Per hari dalam seminggu
 - **Branding**: Upload/hapus logo bisnis
+- **Store Settings**: Feature toggle, portal plan (basic/premium), premium feature list, tema & warna, koordinat lokasi gym
 
 ### 16. Import Data - Owner/Admin
 - **Import Pelanggan** dari CSV
@@ -189,6 +200,7 @@ Setiap tipe bisnis memiliki konfigurasi fitur (feature toggle), profil pelanggan
 - **Packages**: Daftar & detail paket
 - **Loyalty**: Poin & riwayat loyalty
 - **Transactions**: Daftar & detail transaksi
+- **Gym**: QR attendance, timer workout, riwayat presensi
 
 ### 19. Mobile API (REST)
 - Token-based auth via Laravel Sanctum
@@ -224,7 +236,7 @@ Setiap tipe bisnis memiliki konfigurasi fitur (feature toggle), profil pelanggan
 ```bash
 # Clone repository
 git clone <repository-url>
-cd clinic-glowup-web
+cd clinic-glowup-web-feature-multi-business-type
 
 # Install dependencies
 composer install
@@ -236,6 +248,9 @@ php artisan key:generate
 
 # Migrasi database
 php artisan migrate
+
+# (Opsional) Seed data contoh
+php artisan db:seed
 
 # Build assets
 npm run build
@@ -342,5 +357,9 @@ config/
 
 ## License
 
-This project is proprietary software.
-# management_clinic
+Copyright (c) 2026 Bembie.  
+All rights reserved. This project is proprietary software.
+
+## Author
+
+Bembie

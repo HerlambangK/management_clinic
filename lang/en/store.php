@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'title' => 'Stores',
+    'subtitle' => 'Manage store list and approval status',
+    'add' => 'Add Store',
+    'edit' => 'Edit Store',
+    'name' => 'Store Name',
+    'business_type' => 'Business Type',
+    'owner' => 'Owner',
+    'status' => 'Status',
+    'approval' => 'Approval',
+    'approved' => 'Approved',
+    'pending' => 'Pending',
+    'active' => 'Active',
+    'all_status' => 'All Status',
+    'all_business_types' => 'All Business Types',
+    'search_placeholder' => 'Search store name...',
+    'select_owner' => 'Select Owner',
+    'select_business_type' => 'Select business type',
+    'approve_now' => 'Approve now',
+    'owner_needs_approval' => 'New stores become active after admin approval.',
+    'created' => 'Store created successfully.',
+    'updated' => 'Store updated successfully.',
+    'empty' => 'No stores yet.',
+    'select_store_first' => 'Please select a store first.',
+    'all_stores' => 'All Stores',
+];

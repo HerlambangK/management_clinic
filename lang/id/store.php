@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'title' => 'Store',
+    'subtitle' => 'Kelola daftar store dan status approval',
+    'add' => 'Tambah Store',
+    'edit' => 'Edit Store',
+    'name' => 'Nama Store',
+    'business_type' => 'Tipe Bisnis',
+    'owner' => 'Owner',
+    'status' => 'Status',
+    'approval' => 'Approval',
+    'approved' => 'Disetujui',
+    'pending' => 'Menunggu',
+    'active' => 'Aktif',
+    'all_status' => 'Semua Status',
+    'all_business_types' => 'Semua Tipe Bisnis',
+    'search_placeholder' => 'Cari nama store...',
+    'select_owner' => 'Pilih Owner',
+    'select_business_type' => 'Pilih tipe bisnis',
+    'approve_now' => 'Setujui sekarang',
+    'owner_needs_approval' => 'Store baru akan aktif setelah disetujui admin.',
+    'created' => 'Store berhasil dibuat.',
+    'updated' => 'Store berhasil diperbarui.',
+    'empty' => 'Belum ada store.',
+    'select_store_first' => 'Silakan pilih store terlebih dahulu.',
+    'all_stores' => 'Semua Store',
+];
